@@ -1,0 +1,121 @@
+html, body {
+    height:100%;
+    overflow-x: hidden;
+    font-size:14px;
+}
+
+.navbar{
+    box-shadow: 0 0px 0px 0 rgba(0, 0, 0, 0.2), 0 0px 5px 0 rgba(0, 0, 0, 0.19);
+}
+
+.section-heading{
+    border-bottom: 1.5px solid #138af3;
+    font-weight: 400;
+    margin-top:5px;
+}
+
+button{
+    margin:2px;
+    color:#39464e;
+    height: 30px;
+    width: 75px;
+    text-align: center;
+    vertical-align: middle;
+}
+button:hover{
+    color: #138af3;
+}
+
+.navbar-brand{
+    color: #138af3 !important;
+}
+.jumbotron{
+    padding-top:10px;
+    height:50px;
+    padding-bottom: 10px;
+    margin-bottom: 0;
+}
+
+.border-bifurcation{
+    border-right: 1px solid ;
+}
+
+.icon-style{
+    vertical-align: middle;
+    height: 14px;
+    top: -1px;
+    position: relative;
+}
+
+.code-editor{
+    height: 100px;
+    width:100px;
+}
+
+.CodeMirror {
+    height: 100%;
+    overflow-x: hidden;
+    resize: vertical;
+    padding-right:0px;
+  }
+
+.CodeEditor{    
+    height: 98%;
+    text-align: left;
+    margin-top: 8px;
+    box-shadow: 0 0px 0px 0 rgba(0, 0, 0, 0.2), 0 0px 5px 0 rgba(0, 0, 0, 0.19);
+}
+
+.breakpoint-highlight{
+    background-color:#8b8585;
+}
+.breakpoint-normal{
+    background-color: white;
+}
+
+.code-segment{
+    padding-right:0px;
+    margin-top:10px;
+    text-align:center;
+}
+
+.highlight-error{
+    background-color: red;
+}
+
+.row{
+    height:100%;
+    padding-bottom:20%;
+    margin-top:46px;
+}
+
+.footerClass{
+    background-color: #e9ecef;  
+}
+
+.debugImage{
+    border:2px solid red;
+}
+
+.debug-segment{
+    margin-top:10px;
+    text-align:center;
+}
+
+.card{
+    margin-left: 5%;
+    margin-top: 2%;
+    height: 40%;
+    margin-bottom: 10px;
+    background-color: #f8f9fa;
+    box-shadow: 0 0px 0px 0 rgba(0, 0, 0, 0.2), 0 0px 5px 0 rgba(0, 0, 0, 0.19);
+}
+
+.debug-segment>.card {
+    height: 69%;
+    margin-right: 10px;
+}
+
+.dataValue-segment{
+    margin-top:10px;
+}
