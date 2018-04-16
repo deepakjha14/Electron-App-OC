@@ -1,5 +1,5 @@
 html, body {
-    height:100%;
+    height:100vh;
     overflow-x: hidden;
     font-size:14px;
 }
@@ -84,7 +84,7 @@ button:hover{
 }
 
 .row{
-    height:100%;
+    height:90vh;
     padding-bottom:20%;
     margin-top:46px;
 }
@@ -94,6 +94,10 @@ button:hover{
 }
 
 .debugImage{
+    width: 90%;
+    height: 90%;
+    margin-top: 5%;
+    padding-top: 0;
     border:2px solid red;
 }
 
@@ -118,4 +122,12 @@ button:hover{
 
 .dataValue-segment{
     margin-top:10px;
+}
+
+div.CodeEditor~div.card {
+    margin-left: 10px;
+}
+
+#debugArea{
+    height:100%;
 }

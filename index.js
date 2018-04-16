@@ -10,6 +10,8 @@ let invokeBtn = document.getElementById('invokeButton');
 let hiddenPath = document.getElementById('hiddenPath');
 let receiveDiv = document.getElementById("sendReceiveData");
 let debugDiv = document.getElementById("debugArea");
+let cleanCode = document.getElementById("cleanCode");
+let dataValues = document.getElementById("dataValues");
 let fs = require('fs');
 var rwPath;
 let editArea = CodeMirror(document.getElementById("codeEditor"), {
@@ -17,6 +19,13 @@ let editArea = CodeMirror(document.getElementById("codeEditor"), {
     lineNumbers: true,
     gutters: ["CodeMirror-linenumbers", "breakpoints"],
     theme:"3024-day"
+});
+
+cleanCode.addEventListener('click', ()=>{
+    editArea.setValue(editArea.getValue());
+    debugDiv.innerHTML = '';
+    dataValues.innerHTML = '';
+    receiveDiv.innerHTML = '';
 });
 
 /*
@@ -45,7 +54,7 @@ editArea.on("update", (doc)=>{
                 positionObject.activityLineNumbers.push(i);
                 break;
             case "//##Activity":
-                startActivity = i;
+                //startActivity = i;
                 positionObject.activityLineNumbers.push(i);
                 break;
         }     
@@ -61,7 +70,7 @@ function getPath(){
         fs.readdir(rwPath,function(err,files){
             console.log(files);
             positionObject.pngFiles = files.filter(function(fileName,idx){if(fileName.indexOf('.png')>0) return true;})
-                                        .map(function(c){if(c.indexOf('.png')>0) return c.replace(/-/g,'').replace(/_/g,'');});
+                                        .map(function(c){if(c.indexOf('.png')>0) return c.split(".png")[0];}).sort((el, nextEl)=>{return el-nextEl});
         });
     } catch(e) {
         alert('Unable To Read Directory'); 
@@ -75,7 +84,7 @@ function displayDebugImage(brkPointNum){
         for(temp=0;temp<positionObject.activityLineNumbers.length;temp++){
             if(brkPointNum<positionObject.activityLineNumbers[temp+1]) break;
         }
-            elem.setAttribute("src", rwPath+"/"+positionObject.pngFiles[temp]);
+            elem.setAttribute("src", rwPath+"/"+positionObject.pngFiles[temp]+".png");
             elem.setAttribute("height", "100");
             elem.setAttribute("width", "100");
             elem.setAttribute("class", "debugImage");
@@ -95,6 +104,7 @@ editArea.on("keydown", (doc, chgObj)=>{
         editArea.removeLineClass(brkPointNum, "wrap", "breakpoint-highlight");
         brkPointNum--;
         editArea.addLineClass(brkPointNum, "wrap", "breakpoint-highlight");
+        displayDebugImage(brkPointNum);
     }
 });
 
@@ -104,6 +114,7 @@ editArea.on("viewportChange", (doc, chgObj)=>{
 });*/
 
 editArea.on("gutterClick", function(cm, n) {
+    cm.setValue(cm.getValue());
     var info = cm.lineInfo(n);
     cm.setGutterMarker(n, "breakpoints", info.gutterMarkers ? null : makeMarker());
     cm.addLineClass(n, "wrap", "breakpoint-highlight");
@@ -167,14 +178,22 @@ ipcRenderer.on('main-datareceive-event', (event, arg) => {
     });
     if(arg.hasError){
         let errorLine;
-        for(errorIdx = 0;errorIdx<arg.errors.length; errorIdx++){
+        let errorNode;// = document.createElement("div");
+        let errorTextNode;
+        for(let errorIdx = 0;errorIdx<arg.errors.length; errorIdx++){
             errorLine = (parseInt(arg.errors[errorIdx].split(',')[0])-1);
+            errorNode = document.createElement("div");
+            errorTextNode = document.createTextNode(JSON.stringify(arg.errors[errorIdx]))
+            errorNode.appendChild(errorTextNode);
             if(receiveDiv.innerText == undefined || receiveDiv.innerText == ''){
-                receiveDiv.innerText = JSON.stringify(arg.errors[errorIdx]);                
+                receiveDiv.appendChild(errorNode);               
             } else{
-                receiveDiv.innerText += JSON.stringify(arg.errors[errorIdx]);
+                receiveDiv.appendChild(errorNode); 
+                //receiveDiv.appendChild("</div>"+JSON.stringify(arg.errors[errorIdx])+"</div>");
+                // += "/n"+JSON.stringify(arg.errors[errorIdx]);
             }
             editArea.addLineClass(errorLine,"wrap","highlight-error");
+            editArea.scrollIntoView({line:errorLine,char:1});
         }
        /* arg.errors.forEach((element, idx) => {
             if(receiveDiv.innerText == undefined || receiveDiv.innerText == ''){
