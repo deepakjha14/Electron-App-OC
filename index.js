@@ -1,8 +1,10 @@
 // In renderer process (web page).
 const testEditData = "this is line 1 \n this is line 2 \n this is line 3 \n this is line 4 \n this is line 5";
 const {ipcRenderer} = require('electron');
+//const customModule = require('./customModule.js');
 var brkPointNum;
 let positionObject;
+let jsonActions = {};
 
 //let IPCBtn = document.getElementById('IPCButton');
 let ExeBtn = document.getElementById('ExeCode');
@@ -11,7 +13,8 @@ let hiddenPath = document.getElementById('hiddenPath');
 let receiveDiv = document.getElementById("sendReceiveData");
 let debugDiv = document.getElementById("debugArea");
 let cleanCode = document.getElementById("cleanCode");
-let dataValues = document.getElementById("dataValues");
+let jsonDataValuesDiv = document.getElementById("jsonDataValues");
+let dataValuesDiv = document.getElementById("dataValues");
 let fs = require('fs');
 var rwPath;
 let editArea = CodeMirror(document.getElementById("codeEditor"), {
@@ -23,8 +26,8 @@ let editArea = CodeMirror(document.getElementById("codeEditor"), {
 
 cleanCode.addEventListener('click', ()=>{
     editArea.setValue(editArea.getValue());
-    debugDiv.innerHTML = '';
-    dataValues.innerHTML = '';
+    debugDiv.innerHTML = '<div style="display:none"></div>';
+    dataValues.innerHTML = " ";//customModule;
     receiveDiv.innerHTML = '';
 });
 
@@ -66,7 +69,7 @@ function getPath(){
         if(rwPath == undefined){
             rwPath = hiddenPath.innerHTML;
         }
-        hiddenPath.innerHTML = rwPath;
+        //hiddenPath.innerHTML = rwPath;
         fs.readdir(rwPath,function(err,files){
             console.log(files);
             positionObject.pngFiles = files.filter(function(fileName,idx){if(fileName.indexOf('.png')>0) return true;})
@@ -79,28 +82,52 @@ function getPath(){
 
 function displayDebugImage(brkPointNum){
     let temp = 0;
+    //let tempJsonValue = JSON.parse(dataValuesDiv.innerText);
     var elem = document.createElement("img");
     if(brkPointNum>positionObject.startLine && brkPointNum<positionObject.endLine){
         for(temp=0;temp<positionObject.activityLineNumbers.length;temp++){
             if(brkPointNum<positionObject.activityLineNumbers[temp+1]) break;
         }
             elem.setAttribute("src", rwPath+"/"+positionObject.pngFiles[temp]+".png");
-            elem.setAttribute("height", "100");
-            elem.setAttribute("width", "100");
+            //elem.setAttribute("height", "100");
+            //elem.setAttribute("width", "100");
             elem.setAttribute("class", "debugImage");
             debugDiv.replaceChild(elem,debugDiv.childNodes[0]);
+            //jsonDataValuesDiv.innerHTML = tempJsonValue[temp];
+            //jsonDataValuesDiv
+            if(temp>0){
+                dataValuesDiv.innerHTML = "Control Type: "+JSON.stringify(jsonActions[temp-1].ControlType)+ " Value :"+ JSON.stringify(jsonActions[temp-1].value);
+            }
     }
+}
+
+function readJsonDisplay(){
+    if(rwPath == undefined){
+        rwPath = hiddenPath.innerHTML;
+    }
+    fs.readFile(rwPath+"/json.json", 'utf-8' , (err, jsonData)=>{
+        if(err){
+            console.log("Error in json file reading : ", err);
+        }
+
+        console.log(jsonData, " dj reading json");
+        jsonDataValuesDiv.innerHTML = (JSON.parse(jsonData).Actions).toString();
+        jsonActions = JSON.parse(jsonData).Actions;
+    });
 }
 
 editArea.on("keydown", (doc, chgObj)=>{
     //console.log("Keydown Document ",doc,"Change Object",chgObj);
     if(chgObj.key=="F10"){
+        readJsonDisplay();
         editArea.removeLineClass(brkPointNum, "wrap", "breakpoint-highlight");
         brkPointNum++;
         editArea.addLineClass(brkPointNum, "wrap", "breakpoint-highlight");
         displayDebugImage(brkPointNum);
+        
     }
     if(chgObj.key=="F9"){
+        readJsonDisplay();
         editArea.removeLineClass(brkPointNum, "wrap", "breakpoint-highlight");
         brkPointNum--;
         editArea.addLineClass(brkPointNum, "wrap", "breakpoint-highlight");
@@ -114,7 +141,7 @@ editArea.on("viewportChange", (doc, chgObj)=>{
 });*/
 
 editArea.on("gutterClick", function(cm, n) {
-    cm.setValue(cm.getValue());
+    //cm.setValue(cm.getValue());
     var info = cm.lineInfo(n);
     cm.setGutterMarker(n, "breakpoints", info.gutterMarkers ? null : makeMarker());
     cm.addLineClass(n, "wrap", "breakpoint-highlight");
@@ -167,8 +194,12 @@ ipcRenderer.on('response-bat', (event, arg) => {
 });   
 
 ipcRenderer.on('main-datareceive-event', (event, arg) => {
-    console.log(arg, " This data arrived DJ");  // prints data from the main process  
+    console.log(arg, " This data arrived DJ");  // prints data from the main process   
+    if(arg.path != undefined)  {
     rwPath = arg.path;  
+    hiddenPath.innerHTML = rwPath;
+    }
+    readJsonDisplay();
     fs.readFile(arg.path+"/GeneratedAssembly.cs", 'utf-8' , (err, fileData)=>{
         if(err){
             console.log("Error in file reading : ", err);
